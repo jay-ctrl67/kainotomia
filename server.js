@@ -16,19 +16,19 @@ const clip=(s,n)=>String(s==null?'':s).slice(0,n);
 const send=(res,c,o)=>{res.writeHead(c,{'Content-Type':'application/json'});res.end(JSON.stringify(o))};
 const body=req=>new Promise((ok,no)=>{let b='';req.on('data',c=>{b+=c;if(b.length>20000){no(new Error('big'));req.destroy()}});req.on('end',()=>{try{ok(JSON.parse(b||'{}'))}catch(e){no(e)}})});
 const GKEY=process.env.GEMINI_API_KEY,GEM=process.env.AI_PROVIDER?process.env.AI_PROVIDER==='gemini':(!!GKEY&&!KEY),GMODEL=process.env.GEMINI_MODEL||'gemini-2.5-flash',GBASE=process.env.GEMINI_API_URL||'https://generativelanguage.googleapis.com/v1beta';
-const GFALL=[GMODEL,'gemini-2.5-flash','gemini-flash-latest','gemini-2.0-flash'].filter((m,i,a)=>a.indexOf(m)===i);
+const GFALL=[GMODEL,'gemini-2.5-flash','gemini-flash-latest','gemini-2.5-flash-lite','gemini-2.0-flash'].filter((m,i,a)=>a.indexOf(m)===i);
 async function gem(prompt,max,json){
-  let last;
+  let last;const TO=+process.env.GEMINI_TIMEOUT_MS||(max>1000?25000:12000);
   for(const m of GFALL){
     const old=/^gemini-2\.5-flash/.test(m),gc={maxOutputTokens:old?max:max+4000};
     if(json)gc.responseMimeType='application/json';
     if(old)gc.thinkingConfig={thinkingBudget:0};
     let r;
-    for(let t=0;t<2;t++){
-      r=await fetch(GBASE+'/models/'+m+':generateContent',{method:'POST',signal:AbortSignal.timeout(30000),headers:{'content-type':'application/json','x-goog-api-key':GKEY||''},body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:gc})});
+    try{for(let t=0;t<2;t++){
+      r=await fetch(GBASE+'/models/'+m+':generateContent',{method:'POST',signal:AbortSignal.timeout(TO),headers:{'content-type':'application/json','x-goog-api-key':GKEY||''},body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:gc})});
       if(![500,502,503,504].includes(r.status)||t)break;
       await new Promise(ok=>setTimeout(ok,1500));
-    }
+    }}catch(e){console.error('Gemini '+m+' failed: '+e.message+', trying the next model');last=e;continue}
     if([404,429,500,502,503,504].includes(r.status)){console.error('Gemini '+r.status+' for '+m+', trying the next model');last=new Error('api '+r.status);continue}
     if(!r.ok){const t=await r.text().catch(()=>'');console.error('Gemini error '+r.status+' ('+m+'): '+t.slice(0,300));throw new Error('api '+r.status)}
     const d=await r.json(),c=(d.candidates||[])[0]||{},txt=((c.content||{}).parts||[]).map(p=>p.text||'').join('');
