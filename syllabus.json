@@ -1,0 +1,154 @@
+{
+ "CSE": {
+  "Programming in C++": [
+   "Basics and control flow",
+   "Functions and arrays",
+   "Pointers and references",
+   "Classes and objects",
+   "Inheritance and polymorphism"
+  ],
+  "Java Fundamentals": [
+   "Syntax and data types",
+   "Strings and StringTokenizer",
+   "Classes and objects",
+   "Exception handling"
+  ],
+  "Calculus": [
+   "Limits and continuity",
+   "Differentiation",
+   "Integration",
+   "Sequences and series"
+  ],
+  "Linear Algebra": [
+   "Matrices",
+   "Determinants",
+   "Vector spaces",
+   "Eigenvalues and eigenvectors"
+  ],
+  "Physics for Computer Engineers": [
+   "Semiconductors and PN diode",
+   "Band gap",
+   "Solar cell",
+   "Lasers"
+  ],
+  "Computational Thinking and Problem Solving": [
+   "Algorithms and flowcharts",
+   "Pseudocode",
+   "Problem decomposition"
+  ],
+  "Critical Thinking": [
+   "Six Thinking Hats",
+   "Fishbone diagram",
+   "Bias and arguments"
+  ]
+ },
+ "AIML": {
+  "Python for Data Science": [
+   "Python basics",
+   "NumPy and pandas",
+   "Data visualization"
+  ],
+  "Introduction to AI and ML": [
+   "What is AI",
+   "Supervised learning",
+   "Model evaluation"
+  ],
+  "Calculus": [
+   "Limits and continuity",
+   "Differentiation",
+   "Integration",
+   "Sequences and series"
+  ],
+  "Linear Algebra": [
+   "Matrices",
+   "Vector spaces",
+   "Eigenvalues and eigenvectors"
+  ],
+  "Computational Thinking and Problem Solving": [
+   "Algorithms and flowcharts",
+   "Pseudocode",
+   "Problem decomposition"
+  ]
+ },
+ "E&TC": {
+  "Basic Electronics": [
+   "Diodes",
+   "Transistors",
+   "Amplifiers"
+  ],
+  "Network Analysis": [
+   "Ohm’s and Kirchhoff’s laws",
+   "Network theorems",
+   "AC circuits"
+  ],
+  "Calculus": [
+   "Limits and continuity",
+   "Differentiation",
+   "Integration"
+  ],
+  "Programming in C": [
+   "Basics and control flow",
+   "Functions and arrays",
+   "Pointers"
+  ],
+  "Physics": [
+   "Semiconductors",
+   "Optics and lasers",
+   "Waves"
+  ]
+ },
+ "Civil": {
+  "Engineering Mechanics": [
+   "Forces and equilibrium",
+   "Friction",
+   "Centroid and moment of inertia"
+  ],
+  "Engineering Graphics": [
+   "Projections",
+   "Sections",
+   "Isometric views"
+  ],
+  "Calculus": [
+   "Limits and continuity",
+   "Differentiation",
+   "Integration"
+  ],
+  "Environmental Science": [
+   "Ecosystems",
+   "Pollution",
+   "Sustainability"
+  ],
+  "Building Materials": [
+   "Cement and concrete",
+   "Bricks and stones",
+   "Steel and timber"
+  ]
+ },
+ "Robotics & Automation": {
+  "Basic Electrical Engineering": [
+   "DC circuits",
+   "AC circuits",
+   "Motors and transformers"
+  ],
+  "Programming in C": [
+   "Basics and control flow",
+   "Functions and arrays",
+   "Pointers"
+  ],
+  "Calculus": [
+   "Limits and continuity",
+   "Differentiation",
+   "Integration"
+  ],
+  "Engineering Mechanics": [
+   "Forces and equilibrium",
+   "Friction",
+   "Kinematics"
+  ],
+  "Tinker and IDEA Lab": [
+   "Sensors",
+   "Microcontrollers",
+   "Prototyping"
+  ]
+ }
+}

@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kainotomia: AI Learning Assistant (Demo)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#FAF6EE;--card:#FFFCF5;--ink:#2A2118;--mut:#625644;--line:#D9CCAF;--acc:#1D4A78;--onacc:#FFFCF5;--ok:#566A24;--bad:#9E2B25;--gold:#B08A2E;--gold-d:#7A5C14;--c4:#6B2D5C;--c5:#2B7F86;--c6:#7A6A52;--leaf2:#7C8F3F;
+--serif:Georgia,"Palatino Linotype","Book Antiqua",Palatino,serif;--disp:Cinzel,"Trajan Pro","Palatino Linotype",Palatino,Georgia,serif;
+--key:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 12'%3E%3Cpath d='M0 11H14M2 11V1H12V8H6V4H9' fill='none' stroke='black' stroke-width='1.4'/%3E%3C/svg%3E");
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#16120D;--card:#211B14;--ink:#F3EAD7;--mut:#BFB297;--line:#3B3226;--acc:#8DB6E6;--onacc:#16120D;--ok:#A9BF6B;--bad:#E88C82;--gold:#D4AE5A;--gold-d:#D4AE5A;--c4:#C98BB8;--c5:#6CC0C6;--c6:#B5A58A;--leaf2:#8FA85A}}
+:root[data-theme="dark"]{--bg:#16120D;--card:#211B14;--ink:#F3EAD7;--mut:#BFB297;--line:#3B3226;--acc:#8DB6E6;--onacc:#16120D;--ok:#A9BF6B;--bad:#E88C82;--gold:#D4AE5A;--gold-d:#D4AE5A;--c4:#C98BB8;--c5:#6CC0C6;--c6:#B5A58A;--leaf2:#8FA85A}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.65 var(--serif)}
+main{max-width:880px;margin:0 auto;padding:20px 16px 48px}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+header.top{margin:6px 0 14px}
+h1{font:700 30px/1.15 var(--disp);letter-spacing:.06em;margin:6px 0 2px;display:flex;align-items:center;gap:12px;color:var(--ink)}
+h1 svg{width:40px;height:40px;flex:none;color:var(--gold-d)}
+h2{font:700 19px/1.3 var(--disp);letter-spacing:.03em;margin:0 0 6px}
+.sub{color:var(--mut);margin:0 0 12px;font-style:italic}
+.meander{height:15px;background:var(--gold);-webkit-mask:var(--key) repeat-x left center/auto 100%;mask:var(--key) repeat-x left center/auto 100%;margin:4px 0 16px}
+.demo{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:2px;padding:8px 12px;font-size:15px;color:var(--mut);margin-bottom:16px}
+nav{display:flex;gap:6px;margin:12px 0 18px;flex-wrap:wrap;border-bottom:2px solid var(--gold);padding-bottom:10px}
+nav button,.btn{font:700 13px/1.2 var(--disp);letter-spacing:.08em;border:1.5px solid var(--acc);background:transparent;color:var(--acc);border-radius:2px;padding:10px 16px;cursor:pointer}
+nav button.on,.btn{background:var(--acc);color:var(--onacc)}
+nav button:hover:not(:disabled):not(.on){background:var(--line)}
+button:disabled{opacity:.45;cursor:not-allowed}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-top:3px solid var(--gold);border-radius:2px;padding:14px 16px}
+.card p{margin:0;color:var(--mut);font-size:16px}
+.tag{display:inline-block;font:700 13px/1.3 var(--disp);letter-spacing:.04em;color:var(--gold-d);margin-bottom:2px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0}
+input[type=text],textarea,select{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:2px;padding:9px 12px}
+input[type=text],textarea{flex:1;min-width:180px}textarea{width:100%;min-height:80px}
+.chat{display:flex;flex-direction:column;gap:8px;margin:10px 0;min-height:120px}
+.msg{padding:10px 14px;border-radius:2px;white-space:pre-wrap;max-width:90%}
+.me{align-self:flex-end;background:var(--acc);color:var(--onacc)}
+.ai{align-self:flex-start;background:var(--card);border:1px solid var(--line);border-left:3px solid var(--gold)}
+.q{margin:12px 0}.q b{display:block;margin-bottom:6px}
+.q label{display:block;padding:6px 10px;border:1px solid var(--line);border-radius:2px;margin:4px 0;background:var(--card);cursor:pointer}
+.card p.good{color:var(--ok);font-weight:700}.card p.bad{color:var(--bad);font-weight:700}.good{color:var(--ok);font-weight:700}.bad{color:var(--bad);font-weight:700}
+.note{color:var(--mut);font-size:15px}
+details.card summary{cursor:pointer;font-weight:700;list-style:none}details.card summary::-webkit-details-marker{display:none}details.card summary::after{content:"+";float:right;color:var(--gold-d);font-size:22px;line-height:1}details[open].card summary::after{content:"−"}details.card p{margin-top:8px}
+[hidden]{display:none!important}
+.pills{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.pill{font:inherit;font-weight:700;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:2px;padding:6px 14px;cursor:pointer}.pill.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.bar{height:10px;border-radius:1px;background:var(--line);overflow:hidden;margin:8px 0}.fill{height:100%;background:var(--acc)}.big{font:700 28px/1.2 var(--disp)}.card h3{margin:0;font:700 16px/1.3 var(--serif)}#dash h2{margin:16px 0 8px}ul.l{margin:6px 0;padding-left:20px;color:var(--mut)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:14px;color:var(--mut);margin:6px 0}.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}.badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;border:1px solid var(--line);border-radius:2px;padding:1px 6px;color:var(--mut);margin-left:6px;vertical-align:middle}.btn.del{background:transparent;color:var(--bad);border-color:var(--bad)}#tchart{margin-bottom:12px}svg.ch{width:100%;height:auto;display:block}
+.plan{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin:18px 0}
+.plan ol{margin:6px 0 0;padding-left:22px;color:var(--mut)}.plan li{margin:3px 0}
+.plan .card.b{border-top-color:var(--acc)}
+.fbitem{border-left:3px solid var(--gold);padding:4px 12px;margin:8px 0;background:var(--card)}
+.stack{display:flex;flex-direction:column;gap:10px}
+.tsum{display:flex;gap:6px 12px;align-items:center;flex-wrap:wrap}.tsum .nm{font-weight:700;font-size:17px}.tsum .pc{margin-left:auto;color:var(--mut);font-size:15px;padding-right:28px}.tsum .note{margin-left:auto;padding-right:28px}
+details.card summary.tsum::after{position:absolute;right:18px;float:none}details.card{position:relative}
+.mini{width:100%;border-collapse:collapse;font-size:15px;margin:10px 0 4px}.mini th,.mini td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--line)}.mini th{font:700 13px var(--disp);color:var(--gold-d)}
+#tctl select{max-width:100%}
+.hd{display:flex;align-items:center;justify-content:space-between;gap:8px}.hd .mid{flex:1;text-align:center}.hd h1{justify-content:center}.laurel{flex:none;width:110px;height:90px}
+@media (max-width:620px){.laurel{display:none}}
+.pillars{display:flex;justify-content:center;gap:26px;flex-wrap:wrap;margin:6px 0 20px}.pillars div{text-align:center;font:700 14px/1.3 var(--disp);letter-spacing:.03em}.pillars svg{display:block;margin:0 auto 6px}
+footer{margin-top:28px}footer .note{text-align:center;font-style:italic}
+</style>
+</head>
+<body>
+<main>
+<header class="top">
+<div class="hd"><svg class="laurel" aria-hidden="true" viewBox="0 0 110 90"><path d="M10 82 Q26 30 100 10" fill="none" style="stroke:var(--ok)" stroke-width="2.5" stroke-linecap="round"/><path d="M0 0 C7 -9 7 -22 0 -32 C-7 -22 -7 -9 0 0Z" transform="translate(14.3 70.8) rotate(-24.8) scale(0.59)" style="fill:var(--ok)"/><path d="M0 0 C7 -9 7 -22 0 -32 C-7 -22 -7 -9 0 0Z" transform="translate(14.3 70.8) rotate(75.2) scale(0.59)" style="fill:var(--ok)"/><path d="M0 0 C7 -9 7 -22 0 -32 C-7 -22 -7 -9 0 0Z" transform="translate(20.0 60.5) rotate(-16.9) scale(0.63)" style="fill:var(--leaf2)"/><path d="M0 0 C7 -9 7 -22 0 -32 C-7 -22 -7 -9 0 0Z" transform="translate(20.0 60.5) rotate(83.1) scale(0.63)" style="fill:var(--leaf2)"/><path d="M0 0 C7 -9 7 -22 0 -32 C-7 -22 -7 -9 0 0Z" transform="translate(27.1 50.9) rotate(-9.1) scale(0.67)" style="fill:var(--ok)"/><path d="M0 0 C7 -9 7 -22 0 -32 C-7 -22 -7 -9 0 0Z" transform="translate(27.1 50.9) rotate(90.9) scale(0.67)" style="fill:var(--ok)"/><path d="M0 0 C7 -9 7 -22 0 -32 C-7 -22 -7 -9 0 0Z" transform="translate(35.7 42.1) rotate(-1.8) scale(0.71)" style="fill:var(--leaf2)"/><path d="M0 0 C7 -9 7 -22 0 -32 C-7 -22 -7 -9 0 0Z" transform="translate(35.7 42.1) rotate(98.2) scale(0.71)" style="fill:var(--leaf2)"/><path d="M0 0 C7 -9 7 -22 0 -32 C-7 -22 -7 -9 0 0Z" transform="translate(45.7 34.1) rotate(4.9) scale(0.75)" style="fill:var(--ok)"/><path d="M0 0 C7 -9 7 -22 0 -32 C-7 -22 -7 -9 0 0Z" transform="translate(45.7 34.1) rotate(104.9) scale(0.75)" style="fill:var(--ok)"/><path d="M0 0 C7 -9 7 -22 0 -32 C-7 -22 -7 -9 0 0Z" transform="translate(57.1 26.9) rotate(11.0) scale(0.79)" style="fill:var(--leaf2)"/><path d="M0 0 C7 -9 7 -22 0 -32 C-7 -22 -7 -9 0 0Z" transform="translate(57.1 26.9) rotate(111.0) scale(0.79)" style="fill:var(--leaf2)"/><path d="M0 0 C7 -9 7 -22 0 -32 C-7 -22 -7 -9 0 0Z" transform="translate(70.0 20.5) rotate(16.3) scale(0.83)" style="fill:var(--ok)"/><path d="M0 0 C7 -9 7 -22 0 -32 C-7 -22 -7 -9 0 0Z" transform="translate(70.0 20.5) rotate(116.3) scale(0.83)" style="fill:var(--ok)"/><path d="M0 0 C7 -9 7 -22 0 -32 C-7 -22 -7 -9 0 0Z" transform="translate(84.3 14.8) rotate(21.0) scale(0.87)" style="fill:var(--leaf2)"/><path d="M0 0 C7 -9 7 -22 0 -32 C-7 -22 -7 -9 0 0Z" transform="translate(84.3 14.8) rotate(121.0) scale(0.87)" style="fill:var(--leaf2)"/></svg><div class="mid"><h1><svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M4 14 20 5 36 14Z"/><path d="M7 18V31M15 18V31M25 18V31M33 18V31M4 35H36"/></svg>Kainotomia</h1><p class="sub">καινοτομία · innovation in learning. An AI study assistant that supports students and keeps teachers in charge.</p></div><svg class="laurel" aria-hidden="true" viewBox="0 0 110 90" style="transform:scaleX(-1)"><path d="M10 82 Q26 30 100 10" fill="none" style="stroke:var(--ok)" stroke-width="2.5" stroke-linecap="round"/><path d="M0 0 C7 -9 7 -22 0 -32 C-7 -22 -7 -9 0 0Z" transform="translate(14.3 70.8) rotate(-24.8) scale(0.59)" style="fill:var(--ok)"/><path d="M0 0 C7 -9 7 -22 0 -32 C-7 -22 -7 -9 0 0Z" transform="translate(14.3 70.8) rotate(75.2) scale(0.59)" style="fill:var(--ok)"/><path d="M0 0 C7 -9 7 -22 0 -32 C-7 -22 -7 -9 0 0Z" transform="translate(20.0 60.5) rotate(-16.9) scale(0.63)" style="fill:var(--leaf2)"/><path d="M0 0 C7 -9 7 -22 0 -32 C-7 -22 -7 -9 0 0Z" transform="translate(20.0 60.5) rotate(83.1) scale(0.63)" style="fill:var(--leaf2)"/><path d="M0 0 C7 -9 7 -22 0 -32 C-7 -22 -7 -9 0 0Z" transform="translate(27.1 50.9) rotate(-9.1) scale(0.67)" style="fill:var(--ok)"/><path d="M0 0 C7 -9 7 -22 0 -32 C-7 -22 -7 -9 0 0Z" transform="translate(27.1 50.9) rotate(90.9) scale(0.67)" style="fill:var(--ok)"/><path d="M0 0 C7 -9 7 -22 0 -32 C-7 -22 -7 -9 0 0Z" transform="translate(35.7 42.1) rotate(-1.8) scale(0.71)" style="fill:var(--leaf2)"/><path d="M0 0 C7 -9 7 -22 0 -32 C-7 -22 -7 -9 0 0Z" transform="translate(35.7 42.1) rotate(98.2) scale(0.71)" style="fill:var(--leaf2)"/><path d="M0 0 C7 -9 7 -22 0 -32 C-7 -22 -7 -9 0 0Z" transform="translate(45.7 34.1) rotate(4.9) scale(0.75)" style="fill:var(--ok)"/><path d="M0 0 C7 -9 7 -22 0 -32 C-7 -22 -7 -9 0 0Z" transform="translate(45.7 34.1) rotate(104.9) scale(0.75)" style="fill:var(--ok)"/><path d="M0 0 C7 -9 7 -22 0 -32 C-7 -22 -7 -9 0 0Z" transform="translate(57.1 26.9) rotate(11.0) scale(0.79)" style="fill:var(--leaf2)"/><path d="M0 0 C7 -9 7 -22 0 -32 C-7 -22 -7 -9 0 0Z" transform="translate(57.1 26.9) rotate(111.0) scale(0.79)" style="fill:var(--leaf2)"/><path d="M0 0 C7 -9 7 -22 0 -32 C-7 -22 -7 -9 0 0Z" transform="translate(70.0 20.5) rotate(16.3) scale(0.83)" style="fill:var(--ok)"/><path d="M0 0 C7 -9 7 -22 0 -32 C-7 -22 -7 -9 0 0Z" transform="translate(70.0 20.5) rotate(116.3) scale(0.83)" style="fill:var(--ok)"/><path d="M0 0 C7 -9 7 -22 0 -32 C-7 -22 -7 -9 0 0Z" transform="translate(84.3 14.8) rotate(21.0) scale(0.87)" style="fill:var(--leaf2)"/><path d="M0 0 C7 -9 7 -22 0 -32 C-7 -22 -7 -9 0 0Z" transform="translate(84.3 14.8) rotate(121.0) scale(0.87)" style="fill:var(--leaf2)"/></svg></div>
+<div class="meander" aria-hidden="true"></div>
+</header>
+<div class="pills" id="branches" role="group" aria-label="Branch"></div>
+<nav>
+<button id="t-home" type="button" disabled>Home</button>
+<button id="t-policies" class="on" type="button">Policies</button>
+<button id="t-ask" type="button" disabled>Ask</button>
+<button id="t-quiz" type="button" disabled>Quiz</button>
+<button id="t-workshop" type="button">Workshop</button>
+<button id="t-feedback" type="button">Feedback</button>
+<button id="t-teacher" type="button" hidden>Teacher</button>
+</nav>
+
+<section id="home" hidden><div id="dash"></div></section>
+
+<section id="policies">
+<p class="note">Proposed policy for a college rollout. A real rollout would need to follow India’s Digital Personal Data Protection Act, 2023. This prototype is not legal advice.</p>
+<div class="pillars"><div><svg viewBox="-32 -32 64 64" width="64" height="64" aria-hidden="true"><circle r="29" style="fill:var(--card);stroke:var(--gold)" stroke-width="2.5"/><g fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--acc)"><path d="M0 -22 L18 -14 V3 C18 13 9 19 0 23 C-9 19 -18 13 -18 3 V-14Z"/><path d="M-6 2 L-1 7 L8 -5"/></g></svg>Privacy</div><div><svg viewBox="-32 -32 64 64" width="64" height="64" aria-hidden="true"><circle r="29" style="fill:var(--card);stroke:var(--gold)" stroke-width="2.5"/><g fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--acc)"><path d="M0 -22 V19 M-14 19 H14 M-19 -13 H19"/><path d="M-19 -13 L-27 4 M-19 -13 L-11 4 M19 -13 L11 4 M19 -13 L27 4"/><path d="M-27 4 A8 7 0 0 0 -11 4Z M11 4 A8 7 0 0 0 27 4Z"/></g></svg>Fairness</div><div><svg viewBox="-32 -32 64 64" width="64" height="64" aria-hidden="true"><circle r="29" style="fill:var(--card);stroke:var(--gold)" stroke-width="2.5"/><g fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--acc)"><path d="M-10 5 C-19 -2 -18 -20 0 -21 C18 -20 19 -2 10 5 C8 8 8 10 8 13 H-8 C-8 10 -8 8 -10 5Z"/><path d="M-6 19 H6 M-4 24 H4"/></g></svg>Hints</div><div><svg viewBox="-32 -32 64 64" width="64" height="64" aria-hidden="true"><circle r="29" style="fill:var(--card);stroke:var(--gold)" stroke-width="2.5"/><g fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--acc)"><path d="M-23 0 Q0 -19 23 0 Q0 19 -23 0Z"/><circle r="6"/></g></svg>Teachers</div></div>
+<div class="grid">
+<details class="card"><summary><span class="tag">Policy 1</span><br>What we collect</summary><p>Only what the tool needs: your name and roll number, plus your quiz scores, subjects, units and weak areas. Your chats and the questions you ask the AI are never recorded or shared.</p></details>
+<details class="card"><summary><span class="tag">Policy 2</span><br>Why we collect it</summary><p>To show you your progress, adapt your quizzes and let your teacher know when you may need help. It is never used for ranking, advertising or selling to anyone.</p></details>
+<details class="card"><summary><span class="tag">Policy 3</span><br>Who can see it</summary><p>You, and the teacher for your branch. The college keeps control of its own data, and the company that supplies the tool may not use it for its own purposes. After every quiz you can see exactly what was sent.</p></details>
+<details class="card"><summary><span class="tag">Policy 4</span><br>Your choices</summary><p>Personalized learning is your choice, and the trial runs only with your consent. Switch it off for private mode, where nothing is recorded, shared or personalized. You can delete your data at any time from your Home screen, and it is removed from this device and from your teacher’s view.</p></details>
+<details class="card"><summary><span class="tag">Policy 5</span><br>Fairness and accuracy</summary><p>The assistant is checked for bias through regular audits, and it can still be wrong. A check does not prove it is fair, so please do not trust it blindly. A low score or an alert is a signal, not a judgment about you. If something looks unfair or incorrect, tell your teacher or use the Feedback tab.</p></details>
+<details class="card"><summary><span class="tag">Policy 6</span><br>Learning first</summary><p>By default it gives hints and guiding questions. Full answers are for after you have tried the problem yourself. Harder topics and tougher questions are optional, for students who are interested in the course.</p></details>
+<details class="card"><summary><span class="tag">Policy 7</span><br>Teachers decide</summary><p>The AI only supports teachers. An alert is a prompt to talk to you, never a verdict. Teachers are asked to check in with students themselves and not rely on alerts alone, because an alert can miss a student who needs help. A teacher makes every decision about you.</p></details>
+<details class="card"><summary><span class="tag">Policy 8</span><br>Security and retention</summary><p>Data is kept only while you use the tool and is deleted when you ask. Access is limited to your teacher. No system is ever completely secure, so a real rollout would add encryption, regular security checks, fixes for any weaknesses found, and a clear contract with the supplier.</p></details>
+<details class="card"><summary><span class="tag">Policy 9</span><br>Feedback and review</summary><p>A student feedback committee reads the anonymous feedback sent from the Feedback tab. Policies, bias checks and security are reviewed from time to time, and changes are introduced step by step.</p></details>
+<details class="card"><summary><span class="tag">Policy 10</span><br>Trial first</summary><p>The tool starts as a trial in one or two departments, with student consent. It spreads to all departments gradually, and only after feedback has been acted on.</p></details>
+</div>
+<div class="plan">
+<div class="card"><h2>Plan A: trial, then grow</h2><ol><li>Trial in one or two departments, with student consent.</li><li>Strict privacy rules and user rights from the start, with regular bias audits.</li><li>Teachers supervise every AI decision and alert.</li><li>Collect student and faculty feedback and fix problems.</li><li>Extend to all departments gradually.</li></ol></div>
+<div class="card b"><h2>Plan B: if Plan A fails</h2><ol><li>Use a smaller, optional version that does not track students or send “at risk” alerts. Private mode in this prototype works this way.</li><li>If the company cannot give enough privacy and security, look for another company.</li><li>Or use a tool built and run by the college, so the data stays inside the college.</li></ol></div>
+</div>
+<div class="row" id="idrow"><input type="text" id="sname" maxlength="40" placeholder="Your name" aria-label="Your name"><input type="text" id="sroll" maxlength="20" placeholder="Roll number / PRN" aria-label="Roll number"></div>
+<div class="row"><label><input type="checkbox" id="agree"> I have read and understood these policies.</label></div>
+<div class="row"><label><input type="checkbox" id="pers" checked> Turn on personalized learning (recommended): record my progress, adapt my quizzes, and share my results with my teacher. Turn off for private mode, where nothing is recorded, shared or personalized.</label></div>
+<p class="note" id="pmsg"></p>
+<button class="btn" id="start" type="button" disabled>Start learning</button>
+</section>
+
+<section id="ask" hidden>
+<h2>Ask a question</h2>
+<div class="row"><label><input type="checkbox" id="hint" checked> Hint mode (guide me, don’t give the full answer)</label>
+<select id="lvl" aria-label="Level"><option>Standard</option><option>Advanced (opt-in)</option></select></div>
+<div class="chat" id="chat" aria-live="polite"></div>
+<textarea id="q" placeholder="Type your doubt or question here…"></textarea>
+<div class="row"><button class="btn" id="send" type="button">Send</button><button class="btn" id="wipe" type="button" style="background:transparent;color:var(--acc)">Clear chat</button></div>
+<p class="note" id="asknote"></p>
+</section>
+
+<section id="quiz" hidden>
+<h2>Practice quiz</h2>
+<div class="row"><select id="subj" aria-label="Subject"></select><select id="unit" aria-label="Unit"></select>
+<select id="qn" aria-label="Number of questions"><option>5</option><option>3</option><option>8</option></select>
+<select id="qlvl" aria-label="Difficulty"><option>Easy</option><option selected>Medium</option><option>Hard</option></select>
+<button class="btn" id="gen" type="button">Generate quiz</button></div>
+<p class="note">With personalized learning on, each quiz is recorded on your Home screen and shared with your teacher. In private mode nothing is saved. Your chats are never shared.</p>
+<p class="note" id="qnote"></p>
+<div id="qbox"></div>
+<div class="row"><button class="btn" id="check" type="button" hidden>Check answers</button></div>
+<div id="result"></div>
+</section>
+
+<section id="workshop" hidden>
+<h2>Workshop: using AI as a tool</h2>
+<p class="note">A short guide for students and faculty. No sign-in needed.</p>
+<h2 style="margin-top:16px">For students</h2>
+<div class="grid">
+<div class="card"><h3>Try first</h3><p>Attempt the problem before you ask. The assistant gives hints first and a full answer only after you have tried.</p></div>
+<div class="card"><h3>Ask for a hint, not the answer</h3><p>Keep Hint mode on and ask what to try next. That is how you build the skill the exam will test.</p></div>
+<div class="card"><h3>Check what it says</h3><p>The assistant can be wrong. Compare with your notes and textbook, and ask your teacher when you are unsure.</p></div>
+<div class="card"><h3>Know your data</h3><p>Your name, roll number and quiz results go to your teacher. Chats are never shared. Private mode records nothing.</p></div>
+<div class="card"><h3>Say when something feels off</h3><p>If a hint, a quiz or an alert looks unfair, send anonymous feedback from the Feedback tab.</p></div>
+</div>
+<h2 style="margin-top:20px">For faculty</h2>
+<div class="grid">
+<div class="card"><h3>An alert is a prompt</h3><p>Talk to the student before deciding anything. The AI supports you and does not decide for you.</p></div>
+<div class="card"><h3>Look beyond the alerts</h3><p>A student who needs help may not be flagged, and a student who is doing well may be. Keep checking in yourself.</p></div>
+<div class="card"><h3>Watch for bias</h3><p>If recommendations look uneven between students, report it so the next audit can look at it.</p></div>
+</div>
+</section>
+
+<section id="feedback" hidden>
+<h2>Student feedback</h2>
+<p class="note">This form is anonymous and does not record your name or roll number. The student feedback committee and teachers read it.</p>
+<div class="row"><select id="fbtopic" aria-label="Topic"><option>Privacy and data</option><option>Hints and answers</option><option>Quiz or recommendations</option><option>Something felt unfair</option><option>An idea</option></select></div>
+<textarea id="fbtext" maxlength="500" placeholder="What would you like the committee to know?" aria-label="Your feedback"></textarea>
+<div class="row"><button class="btn" id="fbsend" type="button">Send feedback</button></div>
+<p class="note" id="fbnote"></p>
+</section>
+
+<section id="teacher" hidden>
+<h2>Teacher view</h2>
+<p class="note">Showing the selected branch. Students with personalized learning on appear after every quiz. Students in private mode are not recorded. “Needs support” is a prompt to talk to the student, not a verdict. An alert can be wrong, and a student who needs help may not be flagged, so check in with students yourself. Example students with generic names are included for every subject so you can see how this looks. Tap a student to open their details.</p>
+<div class="row" id="tpwrow"><input type="text" id="tpw" placeholder="Teacher password" aria-label="Teacher password"><button class="btn" id="tgo" type="button">View results</button></div>
+<p class="note" id="tnote"></p>
+<div class="row" id="tctl"><select id="tstat" aria-label="Show"><option value="">All students</option><option value="need">Needs support</option><option value="ok">On track</option></select><select id="tsub" aria-label="Subject"></select><select id="tsort" aria-label="Sort by"><option value="need">Sort: needs support first</option><option value="az">Sort: name A to Z</option><option value="high">Sort: highest score</option><option value="low">Sort: lowest score</option></select></div>
+<p class="note" id="tcount"></p>
+<div id="tchart"></div>
+<div id="tlist" class="stack"></div>
+<h2 style="margin-top:20px">Student feedback</h2>
+<div id="fblist"></div>
+</section>
+<footer><div class="meander" aria-hidden="true"></div><p class="note">Demo prototype for a Critical Thinking assignment (Six Thinking Hats, Case 1). Not a real college system. Subjects and units are starter lists, to be checked against each branch’s official syllabus.</p></footer>
+</main>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)};
+var B={"CSE": {"Programming in C++": ["Basics and control flow", "Functions and arrays", "Pointers and references", "Classes and objects", "Inheritance and polymorphism"], "Java Fundamentals": ["Syntax and data types", "Strings and StringTokenizer", "Classes and objects", "Exception handling"], "Calculus": ["Limits and continuity", "Differentiation", "Integration", "Sequences and series"], "Linear Algebra": ["Matrices", "Determinants", "Vector spaces", "Eigenvalues and eigenvectors"], "Physics for Computer Engineers": ["Semiconductors and PN diode", "Band gap", "Solar cell", "Lasers"], "Computational Thinking and Problem Solving": ["Algorithms and flowcharts", "Pseudocode", "Problem decomposition"], "Critical Thinking": ["Six Thinking Hats", "Fishbone diagram", "Bias and arguments"]}, "AIML": {"Python for Data Science": ["Python basics", "NumPy and pandas", "Data visualization"], "Introduction to AI and ML": ["What is AI", "Supervised learning", "Model evaluation"], "Calculus": ["Limits and continuity", "Differentiation", "Integration", "Sequences and series"], "Linear Algebra": ["Matrices", "Vector spaces", "Eigenvalues and eigenvectors"], "Computational Thinking and Problem Solving": ["Algorithms and flowcharts", "Pseudocode", "Problem decomposition"]}, "E&TC": {"Basic Electronics": ["Diodes", "Transistors", "Amplifiers"], "Network Analysis": ["Ohm’s and Kirchhoff’s laws", "Network theorems", "AC circuits"], "Calculus": ["Limits and continuity", "Differentiation", "Integration"], "Programming in C": ["Basics and control flow", "Functions and arrays", "Pointers"], "Physics": ["Semiconductors", "Optics and lasers", "Waves"]}, "Civil": {"Engineering Mechanics": ["Forces and equilibrium", "Friction", "Centroid and moment of inertia"], "Engineering Graphics": ["Projections", "Sections", "Isometric views"], "Calculus": ["Limits and continuity", "Differentiation", "Integration"], "Environmental Science": ["Ecosystems", "Pollution", "Sustainability"], "Building Materials": ["Cement and concrete", "Bricks and stones", "Steel and timber"]}, "Robotics & Automation": {"Basic Electrical Engineering": ["DC circuits", "AC circuits", "Motors and transformers"], "Programming in C": ["Basics and control flow", "Functions and arrays", "Pointers"], "Calculus": ["Limits and continuity", "Differentiation", "Integration"], "Engineering Mechanics": ["Forces and equilibrium", "Friction", "Kinematics"], "Tinker and IDEA Lab": ["Sensors", "Microcontrollers", "Prototyping"]}};
+var ART=!!(window.claude&&claude.use),sample=null,db=null,myId=null;
+var BR=Object.keys(B)[0],prof=null,hist=[],quiz=[],busy=false,tl=[],SECT=["home","policies","ask","quiz","workshop","feedback","teacher"];
+function el(t,c,x,p){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;if(p)p.appendChild(e);return e}
+function post(u,b){return fetch(u,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(b)}).then(function(r){return r.json().then(function(d){if(!r.ok)throw d;return d})})}
+function msg(e){return(e&&e.error)||(e&&e.code==="not_granted"?"AI access was not allowed.":e&&e.code==="rate_limited"?"Too many requests. Please wait a moment.":"Sorry, something went wrong. Please try again.")}
+function ls(k,v){try{if(v===undefined)return JSON.parse(localStorage.getItem(k)||"null");localStorage.setItem(k,JSON.stringify(v))}catch(e){return null}}
+function recs(){return(prof&&ls("kt:r:"+prof.roll))||[]}
+var EX={"CSE":["Aarav Sharma","Diya Patel"],"AIML":["Vihaan Reddy","Ishita Nair"],"E&TC":["Arjun Deshmukh","Meera Kulkarni"],"Civil":["Rohan Joshi","Sneha Pawar"],"Robotics & Automation":["Kabir Singh","Priya Menon"]};
+var P1=[[70,78,66,82,74,68,72],[78,85,72,88,80,75,79]],P2=[[65,58,72,50,60,55,62],[52,45,70,38,35,42,40]],DEMO=[];
+/* Which of the two examples in each branch needs support is shuffled, with a fixed mix of boys and girls, so the examples never show one gender as the one who struggles. */
+var WHO=Math.random()<.5?[0,0,0,1,1]:[0,0,1,1,1];for(var wi=WHO.length-1;wi>0;wi--){var wj=Math.floor(Math.random()*(wi+1)),wt=WHO[wi];WHO[wi]=WHO[wj];WHO[wj]=wt}
+Object.keys(EX).forEach(function(br,bi){EX[br].forEach(function(nm,k){var P=k===WHO[bi]?P2:P1,subs=Object.keys(B[br]),sc=[],tot=subs.length*2;
+[0,1].forEach(function(r){subs.forEach(function(s,i){var pct=P[r][i%7],u=B[br][s][r%B[br][s].length];sc.push({t:Date.now()-(tot-sc.length)*864e5,branch:br,subject:s,unit:u,pct:pct,weak:pct<60?[u]:[]})})});
+DEMO.push({id:"demo-"+bi+"-"+k,name:nm,roll:"Example",demo:1,scores:sc,flag:flagOf(sc)})})});
+function flagOf(a){if(!a.length)return false;var l=a.slice(-3),m=l.reduce(function(s,r){return s+r.pct},0)/l.length;return a[a.length-1].pct<=40||m<50}
+function show(n){SECT.forEach(function(k){$(k).hidden=k!==n;$("t-"+k).classList.toggle("on",k===n)});if(n==="home")dash();if(n==="teacher")renderT()}
+SECT.forEach(function(k){$("t-"+k).onclick=function(){show(k)}});
+function pills(){[].forEach.call($("branches").children,function(b){b.classList.toggle("on",b.textContent===BR)})}
+function fillUnits(){var u=$("unit");u.textContent="";((B[BR]||{})[$("subj").value]||[]).forEach(function(k){el("option","",k,u)})}
+function fillSubj(){var s=$("subj");s.textContent="";Object.keys(B[BR]).forEach(function(k){el("option","",k,s)});fillUnits()}
+$("subj").onchange=fillUnits;
+Object.keys(B).forEach(function(k){var b=el("button","pill",k,$("branches"));b.type="button";b.onclick=function(){BR=k;pills();fillSubj();$("qbox").textContent="";$("result").textContent="";$("check").hidden=true;if(!$("home").hidden)dash();if(!$("teacher").hidden)renderT()}});
+pills();fillSubj();
+function unlock(){["home","ask","quiz"].forEach(function(k){$("t-"+k).disabled=false})}
+function ready(){var need=$("pers").checked;$("idrow").hidden=!need;$("start").disabled=!($("agree").checked&&(!need||($("sname").value.trim()&&$("sroll").value.trim())))}
+["agree","sname","sroll","pers"].forEach(function(i){$(i).onchange=ready;$(i).oninput=ready});
+$("start").onclick=function(){if($("pers").checked){prof={name:$("sname").value.trim(),roll:$("sroll").value.trim()};ls("kt:profile",prof)}else prof={priv:true};$("pmsg").textContent="";unlock();show("home")};
+function stat(g,l,v){var c=el("div","card","",g);el("p","",l,c);el("div","big",v,c)}
+function dash(){
+var d=$("dash");d.textContent="";
+if(!prof){el("p","note","Start from the Policies tab to begin.",d);return}
+if(prof.priv){el("h2","","Private mode",d);el("p","note","Nothing is recorded, shared or personalized. You can still use Ask and Quiz.",d);var pb=el("button","btn","Turn on personalized learning",d);pb.onclick=function(){$("pers").checked=true;ready();show("policies")};return}
+var all=recs().filter(function(r){return r.branch===BR}),subs=B[BR],tot=0,cov={};
+Object.keys(subs).forEach(function(s){tot+=subs[s].length});
+all.forEach(function(r){cov[r.subject+"|"+r.unit]=1});
+var avg=all.length?Math.round(all.reduce(function(a,r){return a+r.pct},0)/all.length):0;
+el("h2","","Hi "+prof.name+", here is your "+BR+" progress",d);
+var g=el("div","grid","",d);stat(g,"Quizzes taken",all.length);stat(g,"Average score",all.length?avg+"%":"–");stat(g,"Units practiced",Object.keys(cov).length+" / "+tot);
+var last={},rc=null,low=101,rs,ru,rt;all.forEach(function(r){last[r.subject+"|"+r.unit]=r});
+Object.keys(last).forEach(function(k){if(last[k].pct<70&&last[k].pct<low){low=last[k].pct;rc=last[k]}});
+if(rc){rs=rc.subject;ru=rc.unit;rt="Revisit "+ru+" ("+rs+"). Your last score was "+rc.pct+"%."}
+else Object.keys(subs).some(function(s){return subs[s].some(function(u){if(!cov[s+"|"+u]){rs=s;ru=u;rt="Try "+u+" ("+s+") next.";return true}})});
+if(rt){el("h2","","Recommended for you",d);var rcd=el("div","card","",d);el("p","",rt,rcd);var rb=el("button","btn","Practice now",rcd);rb.style.marginTop="10px";rb.onclick=function(){$("subj").value=rs;fillUnits();$("unit").value=ru;show("quiz")}}
+el("h2","","Subjects",d);var st=el("div","stack","",d);
+Object.keys(subs).forEach(function(s){
+var rows=all.filter(function(r){return r.subject===s}),lu={};rows.forEach(function(r){lu[r.unit]=r});
+var n=Object.keys(lu).length,a=rows.length?Math.round(rows.reduce(function(x,r){return x+r.pct},0)/rows.length):0;
+var dt=el("details","card","",st),sm=el("summary","tsum","",dt);el("span","nm",s,sm);el("span","note",n+" of "+subs[s].length+" units"+(rows.length?" · average "+a+"%":""),sm);
+var bar=el("div","bar","",dt);el("div","fill","",bar).style.width=Math.round(100*n/subs[s].length)+"%";
+var ul=el("ul","l","",dt);subs[s].forEach(function(u){el("li","",u+": "+(lu[u]?lu[u].pct+"%":"not practiced yet"),ul)})});
+if(all.length){el("h2","","Activity",d);var st2=el("div","stack","",d);
+var d1=el("details","card","",st2);el("summary","nm","Recent quizzes ("+Math.min(5,all.length)+")",d1);var ul2=el("ul","l","",d1);all.slice(-5).reverse().forEach(function(r){el("li","",r.unit+" ("+r.subject+"): "+r.pct+"%",ul2)});
+var wk=[];all.slice(-5).forEach(function(r){(r.weak||[]).forEach(function(w){if(wk.indexOf(w)<0)wk.push(w)})});
+if(wk.length){var d2=el("details","card","",st2);el("summary","nm","To revisit ("+wk.length+")",d2);el("p","",wk.join(", "),d2)}}
+else el("p","note","No quizzes yet. Open the Quiz tab to take your first one.",d);
+el("p","note","Your progress is saved on this device. Each quiz result is also sent to your teacher. You can delete your data at any time. This switches off personalized content.",d);
+var db2=el("button","btn del","Delete my data",d),tm=0;db2.onclick=function(){if(!tm){db2.textContent="Click again to confirm deletion";tm=setTimeout(function(){tm=0;db2.textContent="Delete my data"},5000)}else{clearTimeout(tm);eraseAll()}}}
+function eraseAll(){var p=prof;prof=null;
+if(p&&!p.priv){try{localStorage.removeItem("kt:r:"+p.roll);localStorage.removeItem("kt:profile")}catch(e){}
+if(ART){if(db&&myId)db.doc("results/"+myId).delete().catch(function(){})}else post("/api/forget",{name:p.name,roll:p.roll}).catch(function(){})}
+hist=[];quiz=[];draw();["home","ask","quiz"].forEach(function(k){$("t-"+k).disabled=true});$("sname").value="";$("sroll").value="";$("agree").checked=false;ready();
+$("pmsg").textContent="Your data has been deleted from this device and from your teacher’s view. Personalized content is switched off until you choose it again.";show("policies")}
+function draw(){var c=$("chat");c.textContent="";hist.forEach(function(m){el("div","msg "+(m.role==="user"?"me":"ai"),m.content,c)})}
+$("send").onclick=function(){
+var t=$("q").value.trim();if(!t||busy)return;
+busy=true;$("asknote").textContent="Thinking…";$("q").value="";hist.push({role:"user",content:t});draw();
+var lvl=$("lvl").value.indexOf("Adv")===0?"Advanced":"Standard",hint=$("hint").checked,p;
+if(ART){var mode=hint?"Give hints and guiding questions first, not the full solution. Give the full answer only if the student shows their own attempt or clearly asks for it.":"Give a clear, complete explanation.";
+var cv=hist.map(function(m){return(m.role==="user"?"Student: ":"Assistant: ")+m.content}).join("\n");
+p=sample?sample("You are Kainotomia, a study helper for college students. "+mode+" Level: "+lvl+". Keep replies under 150 words, in plain text. Never ask for personal data. If you are unsure, say so.\n\n"+cv+"\nAssistant:",{cache:false}).then(function(r){return r.text}):Promise.reject({error:"The AI isn’t available here. Open this page in Claude."})}
+else p=post("/api/ask",{messages:hist,hint:hint,level:lvl}).then(function(d){return d.text});
+p.then(function(x){hist.push({role:"assistant",content:x});draw();$("asknote").textContent=""}).catch(function(e){hist.pop();draw();$("asknote").textContent=msg(e)}).then(function(){busy=false})};
+$("wipe").onclick=function(){hist=[];quiz=[];draw();$("qbox").textContent="";$("result").textContent="";$("check").hidden=true;$("asknote").textContent="Your chat has been cleared."};
+$("gen").onclick=function(){
+var sub=$("subj").value,unit=$("unit").value;if(!sub||!unit||busy)return;
+busy=true;$("qnote").textContent="Making your quiz…";$("qbox").textContent="";$("result").textContent="";$("check").hidden=true;
+var n=$("qn").value,lv=$("qlvl").value,p;
+if(ART)p=sample?sample.json("Create a "+n+"-question multiple-choice quiz for a first-year "+BR+" college student on \""+unit+" ("+sub+")\" at "+lv+" difficulty. Return only a JSON array: [{\"q\":\"question\",\"options\":[\"A\",\"B\",\"C\",\"D\"],\"answer\":0,\"topic\":\"short subtopic\",\"why\":\"one-sentence explanation\"}]. The answer is the index (0 to 3) of the correct option.",{cache:false}):Promise.reject({error:"The AI isn’t available here. Open this page in Claude."});
+else p=post("/api/quiz",{branch:BR,subject:sub,unit:unit,n:n,level:lv}).then(function(d){return d.quiz});
+p.then(function(d){
+quiz=(Array.isArray(d)?d:[]).filter(function(x){return x&&x.q&&Array.isArray(x.options)&&x.options.length>1&&typeof x.answer==="number"});
+if(!quiz.length)throw 0;var box=$("qbox");
+quiz.forEach(function(x,i){var w=el("div","q","",box);el("b","",(i+1)+". "+x.q,w);
+x.options.forEach(function(o,j){var l=el("label","","",w);var r=el("input","","",l);r.type="radio";r.name="q"+i;r.value=j;l.appendChild(document.createTextNode(" "+o))});
+var f=el("div","note","",w);f.id="f"+i});
+$("qnote").textContent="";$("check").hidden=false}).catch(function(e){$("qnote").textContent=msg(e)}).then(function(){busy=false})};
+function share(){
+var a=recs();
+if(ART){if(!db||!myId)return Promise.resolve(null);var s=a.slice(-5),fl=flagOf(s);return db.doc("results/"+myId).set({name:prof.name,roll:prof.roll,scores:s,flag:fl,updated:Date.now()}).then(function(){return fl})}
+return post("/api/share",{name:prof.name,roll:prof.roll,score:a[a.length-1]}).then(function(d){return d.flag})}
+$("check").onclick=function(){
+var score=0,weak=[];
+quiz.forEach(function(x,i){var s=document.querySelector("input[name=q"+i+"]:checked"),f=$("f"+i),ok=s&&Number(s.value)===x.answer;
+f.textContent="";el("span",ok?"good":"bad",ok?"Correct. ":"Not quite. ",f);
+f.appendChild(document.createTextNode((ok?"":"Answer: "+x.options[x.answer]+". ")+(x.why||"")));
+if(ok)score++;else if(x.topic&&weak.indexOf(x.topic)<0)weak.push(x.topic)});
+var pct=Math.round(100*score/quiz.length),lv=$("qlvl"),next=lv.value;
+if(!prof.priv){if(pct>=80&&lv.value!=="Hard")next=lv.value==="Easy"?"Medium":"Hard";else if(pct<=40&&lv.value!=="Easy")next=lv.value==="Hard"?"Medium":"Easy"}
+var r=$("result");r.textContent="";el("h2","","Score: "+score+" / "+quiz.length,r);
+el("p","",(weak.length?"Areas to revisit: "+weak.join(", ")+". ":"No weak areas this time. ")+(next!==lv.value?"Your next quiz is now set to "+next+".":"Your next quiz stays at "+lv.value+"."),r);lv.value=next;
+var s=el("p","note","",r);if(prof.priv){s.textContent="Private mode: this result was not saved or shared with anyone.";return}var rec={t:Date.now(),branch:BR,subject:$("subj").value,unit:$("unit").value,pct:pct,weak:weak},a=recs();a.push(rec);ls("kt:r:"+prof.roll,a.slice(-200));
+share().then(function(fl){s.textContent=fl===null?"Sharing with your teacher isn’t available here. Open this page in Claude and sign in.":"Sent to your teacher: "+score+"/"+quiz.length+" in "+rec.unit+(weak.length?", to revisit: "+weak.join(", "):"")+". "+(fl?"Your teacher will reach out to support you. This is a prompt to talk, not a judgement.":"")}).catch(function(e){s.textContent="Your result could not be sent to your teacher right now: "+msg(e)})};
+var PAL=["var(--acc)","var(--gold)","var(--ok)","var(--c4)","var(--c5)","var(--c6)"],NS="http://www.w3.org/2000/svg";
+function sv(t,a,p,st){var e=document.createElementNS(NS,t);for(var k in a)e.setAttribute(k,a[k]);if(st)e.setAttribute("style",st);if(p)p.appendChild(e);return e}
+function chart(rows){var box=$("tchart");box.textContent="";if(!rows.length)return;
+var c=el("div","card","",box);el("h3","","Scores over the last quizzes",c);
+var lg=el("div","legend","",c);rows=rows.slice(0,6);
+var W=640,H=250,L=40,R=30,T=14,Bt=34,n=Math.max.apply(null,rows.map(function(x){return x.scores.length})),svg=sv("svg",{viewBox:"0 0 "+W+" "+H,class:"ch",role:"img","aria-label":"Line chart of each student’s quiz scores with a support line at 40 percent"},c);
+function X(i){return n<2?(L+W-R)/2:L+i*(W-L-R)/(n-1)}function Y(v){return T+(100-v)*(H-T-Bt)/100}
+[0,25,50,75,100].forEach(function(v){sv("line",{x1:L,x2:W-R,y1:Y(v),y2:Y(v)},svg,"stroke:var(--line)");var t=sv("text",{x:L-6,y:Y(v)+4,"text-anchor":"end","font-size":11},svg,"fill:var(--mut)");t.textContent=v+"%"});
+for(var i=0;i<n;i++){var t2=sv("text",{x:X(i),y:H-12,"text-anchor":"middle","font-size":11},svg,"fill:var(--mut)");t2.textContent="Quiz "+(i+1)}
+sv("line",{x1:L,x2:W-R,y1:Y(40),y2:Y(40),"stroke-dasharray":"5 4"},svg,"stroke:var(--bad)");
+var st=sv("text",{x:W-R,y:Y(40)-4,"text-anchor":"end","font-size":11},svg,"fill:var(--bad)");st.textContent="Support line (40%)";
+rows.forEach(function(x,k){var col=PAL[k%PAL.length],pts=x.scores.map(function(s,i){return X(i)+","+Y(s.pct)}).join(" ");
+sv("polyline",{points:pts,fill:"none","stroke-width":2.5},svg,"stroke:"+col);
+x.scores.forEach(function(s,i){sv("circle",{cx:X(i),cy:Y(s.pct),r:3.5},svg,"fill:"+col)});
+var it=el("span","","",lg);var dt=el("span","dot","",it);dt.style.background=col;it.appendChild(document.createTextNode(x.name+" (latest "+x.scores[x.scores.length-1].pct+"%)"))})}
+function renderT(){
+var l=$("tlist");l.textContent="";
+var ts=$("tsub");if(ts.dataset.br!==BR){ts.textContent="";var o0=el("option","","All subjects",ts);o0.value="";Object.keys(B[BR]).forEach(function(s){el("option","",s,ts).value=s});ts.dataset.br=BR}
+var sf=ts.value,sw=$("tstat").value,so=$("tsort").value;
+var base=tl.concat(DEMO).filter(function(x){var s=x.scores||[];return s.length&&s[s.length-1].branch===BR});
+var rows=base.map(function(x){var sc=sf?x.scores.filter(function(r){return r.subject===sf}):x.scores;return{id:x.id,name:x.name,roll:x.roll,demo:x.demo,scores:sc,flag:flagOf(sc)}}).filter(function(x){return x.scores.length&&(!sw||(sw==="need")===x.flag)});
+function lt(x){return x.scores[x.scores.length-1].pct}
+rows.sort(function(a,b){if(so==="az")return String(a.name||a.id).localeCompare(String(b.name||b.id));if(so==="high")return lt(b)-lt(a);if(so==="low")return lt(a)-lt(b);return(b.flag?1:0)-(a.flag?1:0)||lt(a)-lt(b)});
+$("tnote").textContent=base.length?"":(ART||tl.length?"No students in "+BR+" have shared results yet.":"");
+$("tcount").textContent=base.length?"Showing "+rows.length+" of "+base.length+" students in "+BR+(sf?", "+sf:"")+".":"";
+chart(rows);
+rows.forEach(function(x){var sc=x.scores,c=el("details","card","",l),sm=el("summary","tsum","",c);
+el("span","nm",x.demo?x.name:(x.name||x.id)+(x.roll?" ("+x.roll+")":""),sm);if(x.demo)el("span","badge","EXAMPLE",sm);
+el("span",x.flag?"bad":"good",x.flag?"Needs support":"On track",sm);el("span","pc","Latest "+lt(x)+"%",sm);
+var bs={};sc.forEach(function(r){(bs[r.subject]=bs[r.subject]||[]).push(r)});
+var t=el("table","mini","",c),hr=el("tr","","",el("thead","","",t));["Subject","Quizzes","Average","Latest"].forEach(function(h){el("th","",h,hr)});
+var tb=el("tbody","","",t);Object.keys(bs).forEach(function(s){var r=bs[s],a=Math.round(r.reduce(function(m,q){return m+q.pct},0)/r.length),tr=el("tr","","",tb);el("td","",s,tr);el("td","",r.length,tr);el("td","",a+"%",tr);el("td","",r[r.length-1].pct+"%",tr)});
+var wk=[];sc.slice(-5).forEach(function(r){(r.weak||[]).forEach(function(w){if(wk.indexOf(w)<0)wk.push(w)})});
+if(wk.length)el("p","note","To revisit: "+wk.join(", "),c)})}
+["tstat","tsub","tsort"].forEach(function(i){$(i).onchange=renderT});
+$("fbsend").onclick=function(){var t=$("fbtext").value.trim(),n=$("fbnote");if(!t){n.textContent="Write your feedback first.";return}
+$("fbsend").disabled=true;n.textContent="Sending…";
+(ART?(db?db.collection("feedback").doc().set({t:Date.now(),topic:$("fbtopic").value,text:t}):Promise.reject({error:"Feedback needs you to be signed in to Claude."})):post("/api/feedback",{topic:$("fbtopic").value,text:t})).then(function(){$("fbtext").value="";n.textContent="Thank you. Your feedback was sent anonymously to the student feedback committee."}).catch(function(e){n.textContent=msg(e)}).then(function(){$("fbsend").disabled=false})};
+function loadFb(){var l=$("fblist");fetch("/api/feedback",{headers:{"x-teacher-password":$("tpw").value}}).then(function(r){return r.json().then(function(d){if(!r.ok)throw d;return d})}).then(function(d){showFb(d.feedback||[])}).catch(function(){})}
+function showFb(a){var l=$("fblist");l.textContent="";if(!a.length){el("p","note","No feedback yet.",l);return}a.slice().sort(function(x,y){return(y.t||0)-(x.t||0)}).forEach(function(f){var b=el("div","fbitem","",l);el("b","",f.topic,b);el("p","",f.text,b);el("span","note",new Date(f.t).toLocaleDateString(),b)})}
+$("tgo").onclick=function(){fetch("/api/teacher",{headers:{"x-teacher-password":$("tpw").value}}).then(function(r){return r.json().then(function(d){if(!r.ok)throw d;return d})}).then(function(d){tl=d.results||[];loadFb();if(!tl.length)$("tnote").textContent="No students have shared results yet.";else renderT()}).catch(function(e){$("tnote").textContent=msg(e)})};
+if(!ART)fetch("/api/config").then(function(r){return r.json()}).then(function(c){if(c.open){$("tpwrow").hidden=true;$("tgo").onclick()}}).catch(function(){});
+if(ART){$("tpwrow").hidden=true;
+claude.use("sample").then(function(s){sample=s}).catch(function(){});
+(async function(){try{db=await claude.use("db");var user=await claude.use("user");
+if(user){myId=await user.id();if(db&&await user.canEdit()){$("t-teacher").hidden=false;db.collection("results").onSnapshot(function(sn){tl=sn.docs.map(function(d){var v=d.data()||{};v.id=d.id;return v});if(!$("teacher").hidden)renderT()},function(){});db.collection("feedback").onSnapshot(function(sn){showFb(sn.docs.map(function(d){return d.data()||{}}))},function(){})}}}catch(e){}})()}
+else $("t-teacher").hidden=false;
+var p0=ls("kt:profile");if(p0&&p0.name){prof=p0;$("sname").value=p0.name;$("sroll").value=p0.roll;$("agree").checked=true;ready();unlock();show("home")}
+})();
+</script>
+</body>
+</html>
