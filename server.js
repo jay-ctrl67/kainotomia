@@ -23,8 +23,13 @@ async function gem(prompt,max,json){
     const old=/^gemini-2\.5-flash/.test(m),gc={maxOutputTokens:old?max:max+4000};
     if(json)gc.responseMimeType='application/json';
     if(old)gc.thinkingConfig={thinkingBudget:0};
-    const r=await fetch(GBASE+'/models/'+m+':generateContent',{method:'POST',signal:AbortSignal.timeout(30000),headers:{'content-type':'application/json','x-goog-api-key':GKEY||''},body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:gc})});
-    if(r.status===404){console.error('Gemini model not found: '+m);last=new Error('api 404');continue}
+    let r;
+    for(let t=0;t<2;t++){
+      r=await fetch(GBASE+'/models/'+m+':generateContent',{method:'POST',signal:AbortSignal.timeout(30000),headers:{'content-type':'application/json','x-goog-api-key':GKEY||''},body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:gc})});
+      if(![500,502,503,504].includes(r.status)||t)break;
+      await new Promise(ok=>setTimeout(ok,1500));
+    }
+    if([404,429,500,502,503,504].includes(r.status)){console.error('Gemini '+r.status+' for '+m+', trying the next model');last=new Error('api '+r.status);continue}
     if(!r.ok){const t=await r.text().catch(()=>'');console.error('Gemini error '+r.status+' ('+m+'): '+t.slice(0,300));throw new Error('api '+r.status)}
     const d=await r.json(),c=(d.candidates||[])[0]||{},txt=((c.content||{}).parts||[]).map(p=>p.text||'').join('');
     if(!txt){console.error('Gemini returned no text ('+m+'), finish reason: '+c.finishReason+', feedback: '+JSON.stringify(d.promptFeedback||{}));throw new Error('empty')}
