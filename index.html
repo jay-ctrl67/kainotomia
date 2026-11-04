@@ -164,13 +164,13 @@ footer{margin-top:28px}footer .note{text-align:center;font-style:italic}
 <section id="teacher" hidden>
 <h2>Teacher view</h2>
 <p class="note">Showing the selected branch. Students with personalized learning on appear after every quiz. Students in private mode are not recorded. “Needs support” is a prompt to talk to the student, not a verdict. An alert can be wrong, and a student who needs help may not be flagged, so check in with students yourself. Example students with generic names are included for every subject so you can see how this looks. Tap a student to open their details.</p>
-<div class="row" id="tpwrow"><input type="text" id="tpw" placeholder="Teacher password" aria-label="Teacher password"><button class="btn" id="tgo" type="button">View results</button></div>
+<div class="row" id="tpwrow"><input type="password" id="tpw" placeholder="Teacher password" aria-label="Teacher password"><button class="btn" id="tgo" type="button">View results</button></div>
 <p class="note" id="tnote"></p>
 <div class="row" id="tctl"><select id="tstat" aria-label="Show"><option value="">All students</option><option value="need">Needs support</option><option value="ok">On track</option></select><select id="tsub" aria-label="Subject"></select><select id="tsort" aria-label="Sort by"><option value="need">Sort: needs support first</option><option value="az">Sort: name A to Z</option><option value="high">Sort: highest score</option><option value="low">Sort: lowest score</option></select></div>
 <p class="note" id="tcount"></p>
 <div id="tchart"></div>
 <div id="tlist" class="stack"></div>
-<h2 style="margin-top:20px">Student feedback</h2>
+<h2 id="fbh" style="margin-top:20px">Student feedback</h2>
 <div id="fblist"></div>
 </section>
 <footer><div class="meander" aria-hidden="true"></div><p class="note">Demo prototype for a Critical Thinking assignment (Six Thinking Hats, Case 1). Not a real college system. Subjects and units are starter lists, to be checked against each branch’s official syllabus.</p></footer>
@@ -296,7 +296,9 @@ rows.forEach(function(x,k){var col=PAL[k%PAL.length],pts=x.scores.map(function(s
 sv("polyline",{points:pts,fill:"none","stroke-width":2.5},svg,"stroke:"+col);
 x.scores.forEach(function(s,i){sv("circle",{cx:X(i),cy:Y(s.pct),r:3.5},svg,"fill:"+col)});
 var it=el("span","","",lg);var dt=el("span","dot","",it);dt.style.background=col;it.appendChild(document.createTextNode(x.name+" (latest "+x.scores[x.scores.length-1].pct+"%)"))})}
+var unlocked=false;
 function renderT(){
+var lk=!unlocked&&!ART;["tctl","tcount","tchart","tlist","fbh","fblist"].forEach(function(i){$(i).hidden=lk});if(lk){$("tnote").textContent="Enter the teacher password to view results.";return}
 var l=$("tlist");l.textContent="";
 var ts=$("tsub");if(ts.dataset.br!==BR){ts.textContent="";var o0=el("option","","All subjects",ts);o0.value="";Object.keys(B[BR]).forEach(function(s){el("option","",s,ts).value=s});ts.dataset.br=BR}
 var sf=ts.value,sw=$("tstat").value,so=$("tsort").value;
@@ -321,7 +323,7 @@ $("fbsend").disabled=true;n.textContent="Sending…";
 (ART?(db?db.collection("feedback").doc().set({t:Date.now(),topic:$("fbtopic").value,text:t}):Promise.reject({error:"Feedback needs you to be signed in to Claude."})):post("/api/feedback",{topic:$("fbtopic").value,text:t})).then(function(){$("fbtext").value="";n.textContent="Thank you. Your feedback was sent anonymously to the student feedback committee."}).catch(function(e){n.textContent=msg(e)}).then(function(){$("fbsend").disabled=false})};
 function loadFb(){var l=$("fblist");fetch("/api/feedback",{headers:{"x-teacher-password":$("tpw").value}}).then(function(r){return r.json().then(function(d){if(!r.ok)throw d;return d})}).then(function(d){showFb(d.feedback||[])}).catch(function(){})}
 function showFb(a){var l=$("fblist");l.textContent="";if(!a.length){el("p","note","No feedback yet.",l);return}a.slice().sort(function(x,y){return(y.t||0)-(x.t||0)}).forEach(function(f){var b=el("div","fbitem","",l);el("b","",f.topic,b);el("p","",f.text,b);el("span","note",new Date(f.t).toLocaleDateString(),b)})}
-$("tgo").onclick=function(){fetch("/api/teacher",{headers:{"x-teacher-password":$("tpw").value}}).then(function(r){return r.json().then(function(d){if(!r.ok)throw d;return d})}).then(function(d){tl=d.results||[];loadFb();if(!tl.length)$("tnote").textContent="No students have shared results yet.";else renderT()}).catch(function(e){$("tnote").textContent=msg(e)})};
+$("tgo").onclick=function(){fetch("/api/teacher",{headers:{"x-teacher-password":$("tpw").value}}).then(function(r){return r.json().then(function(d){if(!r.ok)throw d;return d})}).then(function(d){unlocked=true;tl=d.results||[];loadFb();renderT();if(!tl.length)$("tnote").textContent="No students have shared results yet. The examples below are fake."}).catch(function(e){$("tnote").textContent=msg(e)})};
 if(!ART)fetch("/api/config").then(function(r){return r.json()}).then(function(c){if(c.open){$("tpwrow").hidden=true;$("tgo").onclick()}}).catch(function(){});
 if(ART){$("tpwrow").hidden=true;
 claude.use("sample").then(function(s){sample=s}).catch(function(){});
