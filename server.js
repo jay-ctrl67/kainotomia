@@ -16,13 +16,24 @@ const clip=(s,n)=>String(s==null?'':s).slice(0,n);
 const send=(res,c,o)=>{res.writeHead(c,{'Content-Type':'application/json'});res.end(JSON.stringify(o))};
 const body=req=>new Promise((ok,no)=>{let b='';req.on('data',c=>{b+=c;if(b.length>20000){no(new Error('big'));req.destroy()}});req.on('end',()=>{try{ok(JSON.parse(b||'{}'))}catch(e){no(e)}})});
 const GKEY=process.env.GEMINI_API_KEY,GEM=process.env.AI_PROVIDER?process.env.AI_PROVIDER==='gemini':(!!GKEY&&!KEY),GMODEL=process.env.GEMINI_MODEL||'gemini-2.5-flash',GBASE=process.env.GEMINI_API_URL||'https://generativelanguage.googleapis.com/v1beta';
-async function ai(prompt,max,json){
-  if(GEM){
-    const gc={maxOutputTokens:max};if(json)gc.responseMimeType='application/json';if(/^gemini-2\.5-flash/.test(GMODEL))gc.thinkingConfig={thinkingBudget:0};
-    const r=await fetch(GBASE+'/models/'+GMODEL+':generateContent',{method:'POST',signal:AbortSignal.timeout(30000),headers:{'content-type':'application/json','x-goog-api-key':GKEY||''},body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:gc})});
-    if(!r.ok)throw new Error('api '+r.status);
-    const d=await r.json();return(((d.candidates||[])[0]||{}).content&&d.candidates[0].content.parts||[]).map(p=>p.text||'').join('');
+const GFALL=[GMODEL,'gemini-2.5-flash','gemini-flash-latest','gemini-2.0-flash'].filter((m,i,a)=>a.indexOf(m)===i);
+async function gem(prompt,max,json){
+  let last;
+  for(const m of GFALL){
+    const old=/^gemini-2\.5-flash/.test(m),gc={maxOutputTokens:old?max:max+4000};
+    if(json)gc.responseMimeType='application/json';
+    if(old)gc.thinkingConfig={thinkingBudget:0};
+    const r=await fetch(GBASE+'/models/'+m+':generateContent',{method:'POST',signal:AbortSignal.timeout(30000),headers:{'content-type':'application/json','x-goog-api-key':GKEY||''},body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:gc})});
+    if(r.status===404){console.error('Gemini model not found: '+m);last=new Error('api 404');continue}
+    if(!r.ok){const t=await r.text().catch(()=>'');console.error('Gemini error '+r.status+' ('+m+'): '+t.slice(0,300));throw new Error('api '+r.status)}
+    const d=await r.json(),c=(d.candidates||[])[0]||{},txt=((c.content||{}).parts||[]).map(p=>p.text||'').join('');
+    if(!txt){console.error('Gemini returned no text ('+m+'), finish reason: '+c.finishReason+', feedback: '+JSON.stringify(d.promptFeedback||{}));throw new Error('empty')}
+    return txt;
   }
+  throw last||new Error('api 404');
+}
+async function ai(prompt,max,json){
+  if(GEM)return gem(prompt,max,json);
   const r=await fetch(API,{method:'POST',signal:AbortSignal.timeout(30000),headers:{'content-type':'application/json','x-api-key':KEY||'','anthropic-version':'2023-06-01'},body:JSON.stringify({model:MODEL,max_tokens:max,messages:[{role:'user',content:prompt}]})});
   if(!r.ok)throw new Error('api '+r.status);
   const d=await r.json();return d.content.map(c=>c.text||'').join('');
@@ -31,6 +42,11 @@ http.createServer(async(req,res)=>{
   try{
     const ip=clip((req.headers['x-forwarded-for']||req.socket.remoteAddress||'').split(',')[0],60);
     if(req.method==='GET'&&(req.url==='/'||req.url==='/index.html')){res.writeHead(200,{'Content-Type':'text/html; charset=utf-8'});return res.end(fs.readFileSync(path.join(__dirname,'index.html')))}
+    if(req.method==='GET'&&req.url.startsWith('/api/health')){
+      const q=new URL(req.url,'http://x').searchParams.get('test'),info={ai:GEM?'gemini':'claude',models:GEM?GFALL:[MODEL],keySet:GEM?!!GKEY:!!KEY};
+      if(q&&PASS&&q===PASS){try{info.test=await ai('Reply with the single word OK.',20)}catch(e){info.test='failed: '+e.message}}
+      return send(res,200,info);
+    }
     if(req.method==='GET'&&req.url==='/api/config')return send(res,200,{open:OPEN});
     if(req.method==='GET'&&req.url==='/api/syllabus')return send(res,200,SY);
     if(req.method==='GET'&&req.url==='/api/teacher'){
@@ -55,8 +71,9 @@ http.createServer(async(req,res)=>{
         const n=[3,5,8].includes(+b.n)?+b.n:5,lv=['Easy','Medium','Hard'].includes(b.level)?b.level:'Medium';
         const sub=clip(b.subject,80),unit=clip(b.unit,80);if(!((SY[clip(b.branch,40)]||{})[sub]||[]).includes(unit))return send(res,400,{error:'Choose a subject and unit from the syllabus.'});
         const topic=unit+' ('+sub+')';
-        const t=await ai('Create a '+n+'-question multiple-choice quiz for a college student on "'+topic+'" at '+lv+' difficulty. Return only a JSON array: [{"q":"question","options":["A","B","C","D"],"answer":0,"topic":"short subtopic","why":"one-sentence explanation"}]. The answer is the index (0 to 3) of the correct option.',2500,true);
-        const quiz=JSON.parse(t.slice(t.indexOf('['),t.lastIndexOf(']')+1));
+        const mk=async()=>{const t=await ai('Create a '+n+'-question multiple-choice quiz for a college student on "'+topic+'" at '+lv+' difficulty. Return only a JSON array: [{"q":"question","options":["A","B","C","D"],"answer":0,"topic":"short subtopic","why":"one-sentence explanation"}]. The answer is the index (0 to 3) of the correct option.',2500,true);
+        const q=JSON.parse(t.slice(t.indexOf('['),t.lastIndexOf(']')+1));if(!Array.isArray(q)||!q.length)throw new Error('bad quiz');return q};
+        let quiz;try{quiz=await mk()}catch(e){console.error('Quiz try 1 failed: '+e.message);quiz=await mk()}
         return send(res,200,{quiz});
       }
       if(req.url==='/api/share'){
@@ -75,5 +92,5 @@ http.createServer(async(req,res)=>{
       if(req.url==='/api/forget'){delete results[(clip(b.name,40).trim()+' ('+clip(b.roll,20).trim()+')').toLowerCase()];save();return send(res,200,{ok:true})}
     }
     send(res,404,{error:'Not found'});
-  }catch(e){if(String(e.message)==='api 429')return send(res,429,{error:'The AI is busy right now. Please try again in a minute.'});if(/^api (400|401|403)$/.test(String(e.message)))return send(res,503,{error:'The AI is not set up correctly. Please tell the person running this site.'});send(res,500,{error:'Something went wrong. Please try again.'})}
+  }catch(e){console.error('Request error: '+e.message);if(/^api (429|500|502|503|504)$/.test(String(e.message))||e.name==='TimeoutError')return send(res,429,{error:'The AI is busy right now. Please try again in a minute.'});if(/^api (400|401|403|404)$/.test(String(e.message)))return send(res,503,{error:'The AI is not set up correctly. Please tell the person running this site.'});send(res,500,{error:'Something went wrong. Please try again.'})}
 }).listen(PORT,()=>{console.log('Kainotomia running on port '+PORT+'. AI: '+(GEM?'Gemini ('+GMODEL+')':'Claude ('+MODEL+')'));if(GEM?!GKEY:!KEY)console.log('WARNING: no API key set for the AI. Ask and Quiz will not work. Set GEMINI_API_KEY (or ANTHROPIC_API_KEY).')});
